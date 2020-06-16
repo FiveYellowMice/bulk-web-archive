@@ -2,6 +2,7 @@
 
 require 'bundler/setup'
 require 'optparse'
+require 'json'
 require 'selenium-webdriver'
 
 use_webdriver = :firefox
@@ -42,7 +43,11 @@ at_exit { drv.quit }
 
 urls.each_with_index do |url, i|
   puts "(#{i + 1}/#{urls.length}) #{url}"
-  drv.get(url)
+  drv.execute_script("window.location = " + JSON.generate(url))
+  sleep 1
+  while drv.execute_script("document.readyState") == 'loading'
+    sleep 1
+  end
   original_handle = drv.window_handles[0]
 
   drv.switch_to.window(original_handle)
